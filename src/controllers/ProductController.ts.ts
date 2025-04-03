@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
-import Order from "../models/order";
 import Product from "../models/Product";
+import { ProductService } from "../services/ProductService";
+
+const service = ProductService()
 
 class ProductController {
 
@@ -9,8 +11,7 @@ class ProductController {
         const { name, price, stock} = req.body
 
         try {
-            const products = new Product({ name, price, stock });
-            await products.save();
+            const products = await service.newProduct({ name, price, stock });
             res.status(201).json(products);
         } 
         catch (error) {
@@ -22,7 +23,7 @@ class ProductController {
         const { id } = req.params;
         
         try {
-            const products = await Product.find({idCustomer: id});
+            const products = await service.getProducts();
             res.status(200).json(products);
         } 
         catch (error) {
@@ -35,9 +36,10 @@ class ProductController {
         const { id } = req.params
 
         try {
-            const product = await Product.findByIdAndDelete(id);
+            const product = await service.deleteProduct(id);
             if (!product) {
-                res.status(404).json({ message: 'product not found' });
+                res.status(404).json({ message: 'product cannot be deleted' });
+                return;
             }
             res.status(200).json({ message: 'product deleted!' });
         } 
