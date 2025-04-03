@@ -8,17 +8,3 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
 
     next();
 };
-
-export const validateRegister = (req: Request, res: Response, next: NextFunction) => {
-    const { email, password } = req.body;
-    
-
-
-    next()
-}
-
-export const validateLogin = (req: Request, res: Response, next: NextFunction) => {
-
-
-    next()
-}

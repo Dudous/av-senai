@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import Customer from "../models/customer";
-import Order from "../models/order";
+import { CustomerService } from "../services/CustomerService";
+
+const service = CustomerService()
 
 class CustomerController {
 
@@ -9,8 +10,8 @@ class CustomerController {
         const { name, email, telefone, endereco} = req.body
 
         try {
-            const customers = new Customer({ name, email, telefone, endereco });
-            await customers.save();
+            const customers = await service.newCustomer({ name, email, telefone, endereco });
+
             res.status(201).json(customers);
         } 
         catch (error) {
@@ -22,7 +23,7 @@ class CustomerController {
         const { id } = req.params;
         
         try {
-            const orders = await Order.find({idCustomer: id});
+            const orders = await service.getOrders(id);
             res.status(200).json(orders);
         } 
         catch (error) {
@@ -34,8 +35,14 @@ class CustomerController {
 
         const { id } = req.params
 
+        const orders = await service.getOrders(id);
+
+        if (orders.length > 0) {
+            return res.status(400).json({ message: 'customer has orders, cannot be deleted' });
+        }
+
         try {
-            const customer = await Customer.findByIdAndDelete(id);
+            const customer = await service.deleteCustomer(id);
             if (!customer) {
                 res.status(404).json({ message: 'customer not found' });
             }
