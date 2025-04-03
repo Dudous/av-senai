@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import Order from "../models/order";
-import Product from "../models/Product";
+import { OrderService } from "../services/OrderService";
 
+const service = OrderService()
 class OrderController {
 
     static async newOrder(req: Request, res: Response): Promise<any> {
@@ -9,8 +9,7 @@ class OrderController {
         const { idCustomer, products, status} = req.body
 
         try {
-            const orders = new Order({ idCustomer, products, status });
-            await orders.save();
+            const orders = await service.newOrder({ idCustomer, products, status });
             res.status(201).json(orders);
         } 
         catch (error) {
@@ -22,7 +21,7 @@ class OrderController {
         const { status } = req.query;
         
         try {
-            const orders = await Order.find({status: status});
+            const orders = await service.getOrders(status as string);
             res.status(200).json(orders);
         } 
         catch (error) {
@@ -30,21 +29,29 @@ class OrderController {
         }
     }
 
-    static async deleteProduct(req: Request, res: Response): Promise<any> {
-
-        const { id } = req.params
+    static async cancelOrder (req: Request, res: Response) {
+        const { id } = req.params;
 
         try {
-            const product = await Product.findByIdAndDelete(id);
-            if (!product) {
-                res.status(404).json({ message: 'product not found' });
+            const task = await service.cancelOrder(id);
+
+            if (task == null) {
+                res.status(404).json({ message: 'order not found' });
+                return;
             }
-            res.status(200).json({ message: 'product deleted!' });
+
+            if (!task) {
+                res.status(400).json({ message: "Pedido não pode ser cancelado" });
+                return;
+            }
+
+            res.status(200).json(task);
         } 
-         catch (error) {
-            res.status(400).json({ message: 'delete product error', error });
+        catch (error) {
+            res.status(400).json({ message: 'update task error', error });
         }
     }
+
 }
 
 export default OrderController;

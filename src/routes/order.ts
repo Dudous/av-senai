@@ -6,5 +6,6 @@ const router: Router = express.Router();
 router
     .post('/', OrderController.newOrder)
     .get('', OrderController.getOrders)
+    .put('/:id/cancel', OrderController.cancelOrder)
 
 export default router

@@ -6,6 +6,6 @@ const router: Router = express.Router();
 
 router
     .post('/register', AuthController.register)
-    .post('/login', AuthController.login)
+    .post('/login', authMiddleware, AuthController.login)
 
 export default router
